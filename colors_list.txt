@@ -364,3 +364,47 @@ color_black =(0,0,0)
 color_white = (255,255,255)
 color_orange = (255,128,0)
 
+def fetch_top_colors(req):
+    global img_file, img_instance
+    if req.method == "POST":
+        form = UploadImage(req.POST, req.FILES)
+        if form.is_valid():
+            if 'img' in req.FILES:
+                save = form.save()
+                img_instance = form.instance
+                img_file = os.path.join(settings.MEDIA_ROOT, str(save.img))
+            image = img_instance
+            k = int(req.POST['drop_down'])
+            img_path = img_file
+
+            with Image.open(img_path) as img_obj:
+                img_colors = list(img_obj.getdata())
+                if img_obj.mode == 'L':
+                    return render(req, 'color_info.html', {'form': form, 'msg': "The image is Grayscale."})
+                
+                color_counts = defaultdict(int)
+                for clr in img_colors:
+                    nearest_color = find_nearest_color(clr[:3])
+                    color_counts[nearest_color] += 1
+                
+                total_pixels = sum(color_counts.values())
+                color_percentages = {clr: (count / total_pixels) * 100 for clr, count in color_counts.items()}
+                
+                color_percentages = {get_color(clr): val for clr, val in color_percentages.items()}
+                color_percentages = dict(sorted(color_percentages.items(), key=lambda item: item[1], reverse=True)[:k])
+                
+                context = {
+                    'form': form,
+                    'image': image,
+                    'top_colors': color_percentages
+                }
+                return render(req, 'color_info.html', context)
+    else:
+        form = UploadImage()
+    images = Upload.objects.all()
+    return render(req, 'color_info.html', {"images": images, 'form': form})
+def find_nearest_color(color):
+    color_lab = rgb2lab(np.array([[color]]))[0][0]
+    dist = deltaE_cie76(color_lab, colors_list_lab)
+    color_keys = list(color_pallette.keys())
+    return color_keys[np.argmin(dist)]
