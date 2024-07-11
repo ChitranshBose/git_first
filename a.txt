@@ -277,3 +277,41 @@ def process_chunk(chunk, val_colors, key_colors):
             lookup[clr_tuple] = dist
         count_map[key_colors[dist]] += 1
     return count_map
+
+
+---------------------------------------------------------------------------------------------
+
+import numpy as np
+from PIL import Image
+from operator import mul
+
+# Path to the image
+img_path = 'path_to_your_image.jpg'
+
+# Open the image and extract its colors
+with Image.open(img_path) as img_obj:
+    w, h = img_obj.size
+    total = mul(w, h)
+    img_colors = np.array(img_obj.getdata())
+
+# Define the batch size
+batch_size = 255
+
+# Process the colors in batches of 255
+for i in range(0, len(img_colors), batch_size):
+    color_batch = img_colors[i:i + batch_size]
+    # Process each batch of 255 colors
+    for clr in color_batch:
+        # Do something with each color in the batch
+        print(clr)  # Example processing: print the color
+    # Optional: break after the first batch for demonstration purposes
+    # break
+
+
+
+
+
+------------------------------------------------------------------------------------------------
+
+def search_multiple_keys(rgb_keys):
+    return {key: original_mapping.get(key, None) for key in rgb_keys}
