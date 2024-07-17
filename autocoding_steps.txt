@@ -435,3 +435,57 @@ query = {
             }
         }
     }
+
+
+
+
+import pandas as pd
+from opensearchpy import OpenSearch
+from tqdm import tqdm
+
+# Sample data
+data = {
+    'id': [1, 2, 3],
+    'title': ['First Document', 'Second Document', 'Third Document'],
+    'content': ['Content of the first document', 'Content of the second document', 'Content of the third document'],
+    'embedding': [[0.1, 0.2, 0.3], [0.2, 0.3, 0.4], [0.3, 0.4, 0.5]]
+}
+
+df = pd.DataFrame(data)
+
+# Connect to OpenSearch
+opensearch_host = 'http://localhost:9200'  # Change this to your OpenSearch host URL
+client = OpenSearch(
+    hosts=[opensearch_host],
+    http_compress=True  # Enables gzip compression for request bodies
+)
+
+# Define the index settings and mappings
+index_name = 'documents'
+index_body = {
+    'settings': {
+        'number_of_shards': 1,
+        'number_of_replicas': 1
+    },
+    'mappings': {
+        'properties': {
+            'id': {'type': 'integer'},
+            'title': {'type': 'text'},
+            'content': {'type': 'text'},
+            'embedding': {
+                'type': 'dense_vector',
+                'dims': 3  # Adjust the dimensions based on your embeddings
+            }
+        }
+    }
+}
+
+# Create the index
+client.indices.create(index=index_name, body=index_body)
+
+# Index the DataFrame rows
+for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
+    doc = row.to_dict()
+    client.index(index=index_name, body=doc, id=doc['id'])
+
+print("Indexing complete.")
