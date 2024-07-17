@@ -393,3 +393,45 @@ Replace placeholder values such as your-region, your-opensearch-endpoint, your-u
 Ensure your AWS credentials are configured and have appropriate permissions to access Bedrock, S3, and OpenSearch.
 The opensearch-py client should be configured to handle SSL and authentication correctly for secure connections to OpenSearch.
 This process covers everything from setting up the necessary AWS services to automating the embedding and indexing pipeline and finally searching the indexed data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+query = {
+        "size": k,
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "knn": {
+                            "field": "embedding_field",  # Replace 'embedding_field' with the actual field name in your index
+                            "query_vector": search_vector,
+                            "k": k,
+                            "num_candidates": 1000  # Adjust as needed
+                        }
+                    },
+                    {
+                        "multi_match": {
+                            "query": text_query,
+                            "fields": ["text_field1", "text_field2"]  # Replace with your actual text fields
+                        }
+                    }
+                ]
+            }
+        }
+    }
