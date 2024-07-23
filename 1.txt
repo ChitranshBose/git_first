@@ -88,3 +88,19 @@ def search(term, k, vec, index):
     df_match_data_res['score'] = (df_match_data_res['score']/max_score)*95
     df_match_data_res['score'] = df_match_data_res['score'].apply(lambda x: float(x))
     return df_match_data_res
+
+
+
+
+
+    316 )
+    318 return response.status, response.headers, raw_data
+
+File ~/.local/lib/python3.10/site-packages/opensearchpy/connection/base.py:315, in Connection._raise_error(self, status_code, raw_data, content_type)
+    312 except (ValueError, TypeError) as err:
+    313     logger.warning("Undecodable raw error response from server: %s", err)
+--> 315 raise HTTP_EXCEPTIONS.get(status_code, TransportError)(
+    316     status_code, error_message, additional_info
+    317 )
+
+RequestError: RequestError(400, 'x_content_parse_exception', '[1:87] Failed to parse list:  expecting START_ARRAY but got VALUE_STRING')
