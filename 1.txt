@@ -1,2 +1,90 @@
-1 file
-2 file
+def search(term, k, vec, index):
+    print(type(vec))
+    # query = {
+    #   "size": 5,
+    #   "query": {
+    #     "script_score": {
+    #       "query": {
+    #         "bool": {
+    #           "must": [
+    #             { "match": { "English Reported": term }}
+    #           ]
+    #         }
+    #       },
+    #       "script": {
+    #         "source": "knn_score",
+    #         "lang": "knn",
+    #         "params": {
+    #           "field": "Embeddings",
+    #           "query_value": vec,
+    #           "space_type": "cosinesimil"
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
+    
+    
+    #     query={
+    #     "size": k,
+    #     "query": {
+    #         "knn": {
+    #             "Embeddings":{
+    #                 "vector":vec,
+    #                 "k":k
+    #             }
+    #         }
+    #     }
+    # }
+    # query = {
+    #     "size": k,
+    #     "query":{
+    #         "match":{
+    #             "English Reported":{
+    #                 "query": term
+    #             }
+    #         }
+    #     }
+    # }
+
+    query = {
+        "query": {
+            "bool":{
+                "must":[
+                    {
+                        "match":{
+                            "English Reported": term,
+                            
+                        }
+                    },
+                    {
+                        "knn":{
+                            "field": "Embeddings",
+                            "query_vector": vec,
+                            "k": k
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    #query["_source"] = return_fields # check for return fields parameter 
+
+    ls_data = []
+    #df_match_data_res = pd.DataFrame(columns = ["English Reported","English Coded LLT","English Coded PT","score"])
+    res = client.search(index = index, body = query)
+    hits = res.get('hits',{}).get('hits',[])
+    print(res['hits']['total']['value'])
+    max_score = res['hits']['max_score']
+    for doc in hits:
+        
+        row = {"English Reported": doc['_source']['English Reported'], "English Coded LLT": doc['_source']['English Coded LLT'], "English Coded PT": doc['_source']['English Coded PT'], "score": doc['_score']}
+        ls_data.append(row)
+    df_match_data_res = pd.DataFrame(ls_data, columns = ["English Reported","English Coded LLT","English Coded PT","score"])
+    
+    df_match_data_res = df_match_data_res.drop_duplicates(['English Coded PT'])   
+    df_match_data_res = df_match_data_res.astype({"score":float})
+    #df_match_data_res = df_match_data_res.nlargest(5,"score")
+    df_match_data_res['score'] = (df_match_data_res['score']/max_score)*95
+    df_match_data_res['score'] = df_match_data_res['score'].apply(lambda x: float(x))
+    return df_match_data_res
