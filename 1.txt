@@ -104,3 +104,27 @@ File ~/.local/lib/python3.10/site-packages/opensearchpy/connection/base.py:315, 
     317 )
 
 RequestError: RequestError(400, 'x_content_parse_exception', '[1:87] Failed to parse list:  expecting START_ARRAY but got VALUE_STRING')
+
+  # query = {
+    #   "size": 5,
+    #   "query": {
+    #     "script_score": {
+    #       "query": {
+    #         "bool": {
+    #           "must": [
+    #             { "match": { "English Reported": term }}
+    #           ]
+    #         }
+    #       },
+    #       "script": {
+    #         "source": "knn_score",
+    #         "lang": "knn",
+    #         "params": {
+    #           "field": "Embeddings",
+    #           "query_value": vec,
+    #           "space_type": "cosinesimil"
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
