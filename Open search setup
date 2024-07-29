@@ -1,0 +1,78 @@
+
+
+Git link: 
+Space Occupied: 1MB per 100 records 
+Index name: test
+Index configuration:
+	Settings:
+		Number of shards: 1
+		Number of replicas: 0
+		Index.knn = True
+		Space type: cosinesimil
+	Index mappings:
+		English Reported: text
+		English Coded LLT: text
+		English Coded PT: text
+		Count: integer
+	 	Embeddings LLT: knn_vector
+	 		dimension: 512
+	 
+Number of documnets: 35000
+
+Setup:
+
+AWS:
+
+Domain creation method: Easy Create.
+Domain-name: autocoding-poc
+Configuration: r6g.large.search
+	Data nodes: 1
+	EBS: GP3- 50Gib
+	Master node: 1 master nodes(r6g.large.search)
+	Availability: 1A-Z without standby
+	Open search version: 2.13
+	IOPS: 3000
+	
+master- username: mlresearch
+password: Rxlogix@125	
+
+Local:
+
+1. Downlaod opensearch-2.15.0-linux-x64.tar.gz from https://opensearch.org/downloads.html
+2. Extract the file.
+3. Downlaod the jre and jdk using commands:
+	sudo apt install default-jre
+	sudo apt install default-jdk
+4. Navigate to opensearch.yml in config folder and add the enteries:
+	plugins.security.ssl.http:
+ 		enabled: false
+		keystore_filepath: certs/http.p12
+
+	# Enable encryption and mutual authentication between cluster nodes
+	plugins.security.ssl.transport:
+ 		enabled: true
+ 		#verification_mode: certificate
+ 		keystore_filepath: certs/transport.p12
+ 		truststore_filepath: certs/transport.p12
+ 		
+
+	# Allow HTTP API connections from anywhere
+	# Connections are encrypted and require user authentication
+	http.host: 0.0.0.0
+
+	plugins.security.disabled: true
+5. Navigate to opensearch-2.15.0 folder and execute command:
+	OPENSEARCH_JAVA_OPTS="-Xms3g -Xmx3g" ./bin/opensearch 
+				OR
+	./opensearch-tar-install.sh
+
+
+5. Local environment configuration:
+	RAM: 16GB
+	Cores: 8
+6. Time required for 10 enteries:
+	Index creation: 0.15 sec
+	Index data: 0.08 sec
+	Vector search: 0.009 sec
+	Text search: 0.01 sec
+
